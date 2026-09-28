@@ -3,11 +3,13 @@ name: NotKac Android APK
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - "NOTKAC-ANDROID-v0.1-WEBVIEW.zip"
       - ".github/workflows/android-build.yml"
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -15,29 +17,32 @@ jobs:
 
     steps:
       - name: Repo dosyalarini al
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Java 17 kur
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Android SDK hazirla
-        uses: android-actions/setup-android@v3
+      - name: Gradle 8.9 kur
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Android SDK paketlerini hazirla
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Kaynak paketi ac
         run: |
           unzip -q NOTKAC-ANDROID-v0.1-WEBVIEW.zip
 
-      - name: Gradle yetkisi ver
-        run: |
-          chmod +x NOTKAC-ANDROID-v0.1-WEBVIEW/gradlew
-
       - name: APK derle
         run: |
           cd NOTKAC-ANDROID-v0.1-WEBVIEW
-          ./gradlew --no-daemon assembleDebug
+          gradle --no-daemon assembleDebug
 
       - name: APK dosyasini hazirla
         run: |
