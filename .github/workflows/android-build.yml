@@ -4,9 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - "NOTKAC-ANDROID-v0.1-WEBVIEW.zip"
-      - ".github/workflows/android-build.yml"
 
 permissions:
   contents: read
@@ -30,10 +27,17 @@ jobs:
         with:
           gradle-version: "8.9"
 
-      - name: Android SDK paketlerini hazirla
+      - name: Android SDK hazirla
         run: |
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          SDKROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          SDKMANAGER="$SDKROOT/cmdline-tools/latest/bin/sdkmanager"
+
+          if [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER=$(find "$SDKROOT/cmdline-tools" -path "*/bin/sdkmanager" | sort -V | tail -1)
+          fi
+
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Kaynak paketi ac
         run: |
@@ -44,7 +48,7 @@ jobs:
           cd NOTKAC-ANDROID-v0.1-WEBVIEW
           gradle --no-daemon assembleDebug
 
-      - name: APK dosyasini hazirla
+      - name: APK hazirla
         run: |
           cp NOTKAC-ANDROID-v0.1-WEBVIEW/app/build/outputs/apk/debug/app-debug.apk NotKac-v0.1-debug.apk
 
