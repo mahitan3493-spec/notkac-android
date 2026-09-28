@@ -43,6 +43,11 @@ jobs:
         run: |
           unzip -q NOTKAC-ANDROID-v0.1-WEBVIEW.zip
 
+      - name: BuildConfig uyumluluk duzeltmesi
+        run: |
+          sed -i 's/WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);/WebView.setWebContentsDebuggingEnabled(false);/' \
+          NOTKAC-ANDROID-v0.1-WEBVIEW/app/src/main/java/com/notkac/app/MainActivity.java
+
       - name: APK derle
         run: |
           cd NOTKAC-ANDROID-v0.1-WEBVIEW
